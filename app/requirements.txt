@@ -2,3 +2,5 @@ fastapi
 uvicorn[standard]
 aioredis
 python-dotenv
+pytest
+pytest-asyncio

@@ -24,5 +24,18 @@ services:
     volumes:
       - redis_data:/data
 
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: transcription-worker
+    command: python workers.py
+    volumes:
+      - ./app:/app
+    depends_on:
+      - redis
+    env_file:
+      - .env
+
 volumes:
   redis_data:
