@@ -66,6 +66,8 @@ test-case_target-ai/
 └── README.md                     # Этот файл
 ```
 
+![Demo](readme_media/test_web.gif)
+
 ## 🚀 Быстрый старт
 
 ### Предварительные требования
@@ -109,6 +111,8 @@ docker exec redis redis-cli ping
 ```
 
 ### 3. Тестирование
+
+![Demo](readme_media/test_movie.gif)
 
 ```bash
 # Активация venv
