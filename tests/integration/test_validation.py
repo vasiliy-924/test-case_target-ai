@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 import asyncio
-import websockets
+import os
 import json
 import time
+import pytest
+import websockets
+
+if os.getenv("RUN_INTEGRATION") != "1":
+    pytest.skip(
+        "Skipping integration tests (set RUN_INTEGRATION=1 to run)",
+        allow_module_level=True,
+    )
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_validation_and_error_handling():

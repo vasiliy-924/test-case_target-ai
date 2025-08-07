@@ -78,7 +78,7 @@ test-case_target-ai/
 
 ```bash
 # Клонируйте репозиторий
-git clone <repository-url>
+git clone git@github.com:vasiliy-924/test-case_target-ai.git
 cd test-case_target-ai
 
 # Запустите все сервисы
@@ -111,29 +111,18 @@ docker exec redis redis-cli ping
 ### 3. Тестирование
 
 ```bash
-# Быстрый WebSocket тест
-python3 tests/websocket/ws_test.py
+# Активация .venv
+source .venv/bin/activate
 
-# Подробный WebSocket тест
-python3 tests/websocket/test_websocket_detailed.py
+# Все юнит-тесты (без Docker)
+pytest -q
 
-# Тест интеграции воркера
-python3 tests/integration/test_worker_integration.py
+# Все тесты, включая интеграционные и нагрузочные (нужен Docker)
+docker compose up -d --build
+RUN_INTEGRATION=1 pytest -q
 
-# Тест валидации и обработки ошибок
-python3 tests/integration/test_validation.py
-
-# Упрощенный тест валидации
-python3 tests/integration/test_validation_simple.py
-
-# Интеграционные тесты
-python3 tests/integration/test_integration.py
-
-# Нагрузочное тестирование
-python3 tests/load/test_load.py
-
-# Юнит-тесты Redis/WebSocket
-python3 tests/test_redis_unit.py
+# Только нагрузочные
+RUN_INTEGRATION=1 pytest tests/load/test_load.py -q
 ```
 
 ### 4. Веб-интерфейс
@@ -297,20 +286,16 @@ MAX_AUDIO_SIZE=1048576  # 1MB в байтах
 ### Запуск тестов
 
 ```bash
-# Все тесты
-python3 tests/test_integration.py
-python3 tests/test_load.py
+# Все юнит-тесты
+pytest -q
 
-# Отдельные тесты
-python3 tests/ws_test.py
-python3 tests/test_validation.py
+# Интеграция и нагрузка (ввести для тестирования)
+RUN_INTEGRATION=1 pytest -q
 ```
 
-### Результаты тестирования
+### Результаты тестирования (локально)
 
-- ✅ **Юнит-тесты:** 5/5 (100%)
-- ✅ **Интеграционные тесты:** 4/4 (100%)
-- ✅ **Нагрузочные тесты:** 1/1 (100%)
+- ✅ Все тесты прошли: `23 passed` (включая нагрузочные)
 
 ## 📊 Мониторинг и логи
 

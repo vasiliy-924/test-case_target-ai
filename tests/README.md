@@ -63,36 +63,22 @@
 ## Запуск тестов
 
 ```bash
-# Установка зависимостей
-pip install websockets
+# Активация виртуального окружения
+source .venv/bin/activate
 
-# Быстрый тест WebSocket
-python3 tests/websocket/ws_test.py
+# Юнит-тесты (без внешних сервисов)
+pytest -q
 
-# Подробный тест WebSocket
-python3 tests/websocket/test_websocket_detailed.py
+# Интеграционные, WebSocket и нагрузочные тесты
+# Требуют запущенных сервисов (docker compose up -d)
+RUN_INTEGRATION=1 pytest -q
 
-# Тест интеграции воркера
-python3 tests/integration/test_worker_integration.py
-
-# Тест валидации и обработки ошибок
-python3 tests/integration/test_validation.py
-
-# Упрощенный тест валидации
-python3 tests/integration/test_validation_simple.py
-
-# Интеграционные тесты
-python3 tests/integration/test_integration.py
-
-# Нагрузочное тестирование
-python3 tests/load/test_load.py
-
-# Юнит-тесты Redis/WebSocket
-python3 tests/test_redis_unit.py
+# Запуск только нагрузочных тестов
+RUN_INTEGRATION=1 pytest tests/load/test_load.py -q
 ```
 
 ## Требования
 
 - Python 3.10+
-- websockets библиотека
-- Запущенный WebSocket сервер (docker-compose up) 
+- Запущенные Docker-сервисы (`docker compose up -d`) для интеграционных/нагрузочных тестов
+- Активированное виртуальное окружение `.venv`

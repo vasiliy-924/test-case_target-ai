@@ -1,6 +1,8 @@
 import asyncio
 import logging
 from typing import Optional
+import base64
+import json
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -95,8 +97,11 @@ async def listen_transcripts(redis, websocket, client_id):
                         await send_error_response(websocket, error_msg)
                         continue
 
-                    # Декодируем текст транскрипта
-                    text = message["data"].decode("utf-8", errors="ignore")
+                    # Декодируем JSON транскрипта
+                    transcript_data = json.loads(message["data"].decode("utf-8"))
+                    if transcript_data.get("client_id") != client_id:
+                        continue
+                    text = transcript_data["text"]
                     logger.info(
                         f"Received transcript for client {client_id}: {text}")
 
@@ -162,7 +167,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 )
 
                 # Публикуем бинарные данные в Redis
-                await redis.publish(AUDIO_CHANNEL, data)
+                audio_b64 = base64.b64encode(data).decode('utf-8')
+                await redis.publish(
+                    AUDIO_CHANNEL,
+                    json.dumps({"client_id": client_id, "audio": audio_b64})
+                )
                 logger.info(
                     f"Published audio chunk to Redis for client {client_id}")
 

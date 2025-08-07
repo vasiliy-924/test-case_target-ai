@@ -1,5 +1,12 @@
 import asyncio
+import os
+import pytest
 import websockets
+
+if os.getenv("RUN_INTEGRATION") != "1":
+    pytest.skip("Skipping websocket tests (set RUN_INTEGRATION=1 to run)", allow_module_level=True)
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_ws():

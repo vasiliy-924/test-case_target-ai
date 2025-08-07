@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 """
-Нагрузочное тестирование для проверки устойчивости при параллельных соединениях.
+Нагрузочное тестирование при параллельных соединениях.
 """
 import asyncio
-import websockets
+import os
 import json
 import time
 import statistics
-from concurrent.futures import ThreadPoolExecutor
+import pytest
+import websockets
+
+if os.getenv("RUN_INTEGRATION") != "1":
+    pytest.skip(
+        "Skipping load tests (set RUN_INTEGRATION=1 to run)",
+        allow_module_level=True,
+    )
+
+pytestmark = pytest.mark.asyncio
 
 
 async def load_test_client(client_id, num_messages=10):
@@ -84,7 +93,7 @@ async def load_test_client(client_id, num_messages=10):
 
                 except asyncio.TimeoutError:
                     break
-                except Exception as e:
+                except Exception:
                     results["errors"] += 1
                     break
 
@@ -104,8 +113,11 @@ async def run_load_test(num_clients=10, messages_per_client=5):
         num_clients (int): Количество параллельных клиентов
         messages_per_client (int): Количество сообщений на клиента
     """
-    print(
-        f"🚀 Starting load test with {num_clients} clients, {messages_per_client} messages each...")
+    header = (
+        "🚀 Starting load test with "
+        f"{num_clients} clients, {messages_per_client} messages each..."
+    )
+    print(header)
 
     # Создаем задачи для всех клиентов
     tasks = [
@@ -165,7 +177,7 @@ async def run_load_test(num_clients=10, messages_per_client=5):
     transcript_rate = total_transcripts_received / \
         total_messages_sent if total_messages_sent > 0 else 0
 
-    print(f"\nPERFORMANCE METRICS")
+    print("\nPERFORMANCE METRICS")
     print(f"{'='*60}")
     print(f"Client success rate: {success_rate:.1%}")
     print(f"Message success rate: {message_success_rate:.1%}")
@@ -173,10 +185,10 @@ async def run_load_test(num_clients=10, messages_per_client=5):
 
     # Определяем статус теста
     if success_rate >= 0.8 and total_errors < num_clients:
-        print(f"\n✅ Load test PASSED")
+        print("\n✅ Load test PASSED")
         return True
     else:
-        print(f"\n❌ Load test FAILED")
+        print("\n❌ Load test FAILED")
         return False
 
 
@@ -199,8 +211,11 @@ async def run_stress_test():
     result3 = await run_load_test(num_clients=15, messages_per_client=10)
 
     overall_success = result1 and result2 and result3
-    print(
-        f"\n📊 Overall stress test: {'✅ PASSED' if overall_success else '❌ FAILED'}")
+    summary = (
+        "\n📊 Overall stress test: "
+        f"{'✅ PASSED' if overall_success else '❌ FAILED'}"
+    )
+    print(summary)
 
     return overall_success
 
@@ -214,3 +229,18 @@ if __name__ == "__main__":
         success = asyncio.run(run_load_test())
 
     exit(0 if success else 1)
+
+
+# Pytest entrypoint for CI/integration runs
+@pytest.mark.asyncio
+async def test_load_quick():
+    """Quick load test under pytest to validate performance path."""
+    result = await run_load_test(num_clients=5, messages_per_client=3)
+    assert result is True
+
+
+@pytest.mark.asyncio
+async def test_load_stress():
+    """Stress load test under pytest to validate stability under pressure."""
+    result = await run_stress_test()
+    assert result is True

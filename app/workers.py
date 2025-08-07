@@ -1,6 +1,8 @@
 import asyncio
 import logging
 from datetime import datetime
+import json
+import base64
 
 from redis_client import (
     get_redis_client,
@@ -50,24 +52,27 @@ async def process_audio_chunks():
         async for message in pubsub.listen():
             if message["type"] == "message":
                 try:
-                    audio_data = message["data"]
+                    # Декодируем JSON
+                    payload = json.loads(message["data"].decode("utf-8"))
+                    client_id = payload["client_id"]
+                    audio_data = base64.b64decode(payload["audio"])
                     logger.info(
-                        f"Received audio chunk: {len(audio_data)} bytes"
+                        f"Received audio chunk from client {client_id}: {len(audio_data)} bytes"
                     )
 
                     # Создаем фиктивный транскрипт
                     transcript = await mock_transcribe_audio(audio_data)
                     logger.info(
-                        f"Generated transcript: {transcript}"
+                        f"Generated transcript: {transcript} for client {client_id}"
                     )
 
-                    # Публикуем транскрипт в канал transcripts
+                    # Публикуем транскрипт в канал transcripts как JSON
                     await redis.publish(
                         TRANSCRIPTS_CHANNEL,
-                        transcript.encode('utf-8')
+                        json.dumps({"client_id": client_id, "text": transcript}).encode("utf-8")
                     )
                     logger.info(
-                        f"Published transcript to channel: {TRANSCRIPTS_CHANNEL}"
+                        f"Published transcript to channel: {TRANSCRIPTS_CHANNEL} for client {client_id}"
                     )
 
                 except Exception as e:

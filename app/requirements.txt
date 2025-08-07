@@ -1,6 +1,6 @@
 fastapi
 uvicorn[standard]
-aioredis
+redis>=5.0
 python-dotenv
 pytest
 pytest-asyncio

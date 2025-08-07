@@ -1,6 +1,6 @@
 from config import get_redis_url
 
-import aioredis
+import redis.asyncio as redis
 
 
 # Определение каналов Redis
@@ -13,9 +13,9 @@ async def get_redis_client():
     Создает и возвращает асинхронный клиент Redis.
 
     Returns:
-        aioredis.Redis: Асинхронный клиент Redis
+        redis.Redis: Асинхронный клиент Redis
     """
-    return await aioredis.from_url(get_redis_url(), decode_responses=False)
+    return redis.from_url(get_redis_url(), decode_responses=False)
 
 
 async def test_redis_connection():
@@ -29,7 +29,8 @@ async def test_redis_connection():
         redis = await get_redis_client()
         result = await redis.ping()
         await redis.close()
-        return result == b"PONG"
+        # redis.asyncio returns True; older clients may return b"PONG"
+        return bool(result) or result == b"PONG"
     except Exception as e:
         print(f"Redis connection test failed: {e}")
         return False
