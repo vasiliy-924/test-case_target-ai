@@ -17,15 +17,7 @@ router = APIRouter()
 
 
 def validate_audio_data(data: bytes) -> tuple[bool, Optional[str]]:
-    """
-    Валидирует аудио данные.
-
-    Args:
-        data (bytes): Бинарные аудио данные
-
-    Returns:
-        tuple[bool, Optional[str]]: (валидность, сообщение об ошибке)
-    """
+    """Проверяет аудио-данные: не пустые и не превышают лимит размера."""
     if not data:
         return False, "Audio data is empty"
 
@@ -37,15 +29,7 @@ def validate_audio_data(data: bytes) -> tuple[bool, Optional[str]]:
 
 
 def validate_transcript_data(data: bytes) -> tuple[bool, Optional[str]]:
-    """
-    Валидирует данные транскрипта.
-
-    Args:
-        data (bytes): Бинарные данные транскрипта
-
-    Returns:
-        tuple[bool, Optional[str]]: (валидность, сообщение об ошибке)
-    """
+    """Проверяет транскрипт: валидная UTF-8 и непустой текст."""
     if not data:
         return False, "Transcript data is empty"
 
@@ -59,13 +43,7 @@ def validate_transcript_data(data: bytes) -> tuple[bool, Optional[str]]:
 
 
 async def send_error_response(websocket: WebSocket, error_message: str):
-    """
-    Отправляет сообщение об ошибке клиенту.
-
-    Args:
-        websocket (WebSocket): WebSocket соединение
-        error_message (str): Сообщение об ошибке
-    """
+    """Отправляет клиенту JSON с ошибкой через WebSocket."""
     try:
         await websocket.send_json({
             "error": error_message,
@@ -77,9 +55,7 @@ async def send_error_response(websocket: WebSocket, error_message: str):
 
 
 async def listen_transcripts(redis, websocket, client_id):
-    """
-    Слушает канал транскриптов и отправляет их клиенту.
-    """
+    """Слушает Redis-канал транскриптов и ретранслирует сообщения клиенту."""
     pubsub = redis.pubsub()
     await pubsub.subscribe(TRANSCRIPTS_CHANNEL)
     logger.info(f"Client {client_id} subscribed to transcripts channel")
@@ -93,7 +69,9 @@ async def listen_transcripts(redis, websocket, client_id):
                         message["data"])
                     if not is_valid:
                         logger.error(f"Invalid transcript data: {error_msg}")
-                        await send_error_response(websocket, error_msg)
+                        await send_error_response(
+                            websocket, error_msg or "Invalid transcript data"
+                        )
                         continue
 
                     # Декодируем JSON транскрипта
@@ -131,9 +109,7 @@ async def listen_transcripts(redis, websocket, client_id):
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    """
-    WebSocket эндпоинт для обработки аудио данных и получения транскриптов.
-    """
+    """Обрабатывает аудио-чанки клиента и отсылает транскрипты."""
     await websocket.accept()
     client_id = id(websocket)
     logger.info(f"Client {client_id} connected")
@@ -157,7 +133,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 if not is_valid:
                     logger.error(
                         f"Invalid audio data from client {client_id}: {error_msg}")
-                    await send_error_response(websocket, error_msg)
+                    await send_error_response(
+                        websocket, error_msg or "Invalid audio data"
+                    )
                     continue
 
                 logger.info(

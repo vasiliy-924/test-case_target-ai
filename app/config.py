@@ -1,27 +1,25 @@
 import os
-from typing import Optional
-
 from dotenv import load_dotenv
 
 from constants import DEFAULT_MAX_AUDIO_SIZE_BYTES
 
-# Загружаем переменные из .env
 load_dotenv()
 
-APP_PORT = int(os.getenv("APP_PORT", 8000))
+APP_PORT = int(os.getenv("APP_PORT", "8000"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
-MAX_AUDIO_SIZE = int(
-    os.getenv("MAX_AUDIO_SIZE", DEFAULT_MAX_AUDIO_SIZE_BYTES)
-)
+MAX_AUDIO_SIZE = int(os.getenv("MAX_AUDIO_SIZE", str(DEFAULT_MAX_AUDIO_SIZE_BYTES)))
 
 
 def get_app_port() -> int:
+    """Возвращает порт HTTP-приложения."""
     return APP_PORT
 
 
 def get_redis_url() -> str:
+    """Возвращает URL подключения к Redis."""
     return REDIS_URL
 
 
 def get_max_audio_size() -> int:
+    """Возвращает максимальный размер аудио-чанка в байтах."""
     return MAX_AUDIO_SIZE

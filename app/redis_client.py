@@ -5,27 +5,16 @@ from constants import AUDIO_CHANNEL, TRANSCRIPTS_CHANNEL
 
 
 async def get_redis_client():
-    """
-    Создает и возвращает асинхронный клиент Redis.
-
-    Returns:
-        redis.Redis: Асинхронный клиент Redis
-    """
+    """Создает и возвращает асинхронный клиент Redis (redis.asyncio)."""
     return redis.from_url(get_redis_url(), decode_responses=False)
 
 
 async def test_redis_connection():
-    """
-    Тестирует подключение к Redis.
-
-    Returns:
-        bool: True если подключение успешно, False в противном случае
-    """
+    """Проверяет доступность Redis командой PING."""
     try:
         redis = await get_redis_client()
         result = await redis.ping()
         await redis.close()
-        # redis.asyncio returns True; older clients may return b"PONG"
         return bool(result) or result == b"PONG"
     except Exception as e:
         print(f"Redis connection test failed: {e}")
@@ -33,12 +22,7 @@ async def test_redis_connection():
 
 
 async def publish_audio_chunk(data: bytes):
-    """
-    Публикует аудио данные в Redis канал.
-
-    Args:
-        data (bytes): Бинарные аудио данные
-    """
+    """Публикует бинарный аудио-чанк в канал Redis."""
     redis = await get_redis_client()
     try:
         await redis.publish(AUDIO_CHANNEL, data)
@@ -47,12 +31,7 @@ async def publish_audio_chunk(data: bytes):
 
 
 async def subscribe_to_transcripts(callback):
-    """
-    Подписывается на канал транскриптов и вызывает callback при получении сообщения.
-
-    Args:
-        callback: Функция обратного вызова, принимающая текст транскрипта
-    """
+    """Подписывается на канал транскриптов и вызывает callback на каждое сообщение."""
     redis = await get_redis_client()
     pubsub = redis.pubsub()
     try:

@@ -10,11 +10,13 @@ app.include_router(ws_router)
 
 @app.get("/")
 def root():
+    """Возвращает статус сервиса."""
     return {"message": "WebSocket Service is running"}
 
 
 @app.get("/config")
 def get_config():
+    """Возвращает текущую конфигурацию сервиса."""
     return {
         "APP_PORT": get_app_port(),
         "REDIS_URL": get_redis_url()

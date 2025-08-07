@@ -19,6 +19,18 @@ if os.getenv("RUN_INTEGRATION") != "1":
 pytestmark = pytest.mark.asyncio
 
 
+async def connect_with_retry(uri: str, attempts: int = 20, delay: float = 0.25):
+    """Подключается к WebSocket с ретраями до готовности сервиса."""
+    last_error = None
+    for _ in range(attempts):
+        try:
+            return await websockets.connect(uri)
+        except Exception as e:  # noqa: BLE001
+            last_error = e
+            await asyncio.sleep(delay)
+    raise RuntimeError(f"Cannot connect to {uri}: {last_error}")
+
+
 async def load_test_client(client_id, num_messages=10):
     """
     Клиент для нагрузочного тестирования.
@@ -44,7 +56,7 @@ async def load_test_client(client_id, num_messages=10):
     }
 
     try:
-        async with websockets.connect(uri) as websocket:
+        async with (await connect_with_retry(uri)) as websocket:
             results["connected"] = True
 
             # Отправляем сообщения
