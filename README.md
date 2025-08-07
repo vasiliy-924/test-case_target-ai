@@ -48,13 +48,17 @@ test-case_target-ai/
 │   ├── test_websocket.html      # HTML страница для тестирования
 │   └── README.md                # Описание статических файлов
 ├── tests/                        # Тесты
-│   ├── ws_test.py               # Простой WebSocket тест
-│   ├── test_websocket_detailed.py # Подробный WebSocket тест
-│   ├── test_worker_integration.py # Тест интеграции воркера
-│   ├── test_validation.py       # Тест валидации
-│   ├── test_validation_simple.py # Упрощенный тест валидации
-│   ├── test_integration.py      # Интеграционные тесты
-│   ├── test_load.py             # Нагрузочное тестирование
+│   ├── integration/             # Интеграционные и валидационные тесты
+│   │   ├── test_integration.py
+│   │   ├── test_worker_integration.py
+│   │   ├── test_validation.py
+│   │   └── test_validation_simple.py
+│   ├── websocket/               # Тесты WebSocket соединения
+│   │   ├── ws_test.py
+│   │   └── test_websocket_detailed.py
+│   ├── load/                    # Нагрузочные тесты
+│   │   └── test_load.py
+│   ├── test_redis_unit.py       # Юнит-тесты для Redis и WebSocket-логики
 │   └── README.md                # Описание тестов
 ├── docker-compose.yml            # Docker Compose конфигурация
 ├── Dockerfile                    # Docker образ
@@ -108,25 +112,28 @@ docker exec redis redis-cli ping
 
 ```bash
 # Быстрый WebSocket тест
-python3 tests/ws_test.py
+python3 tests/websocket/ws_test.py
 
 # Подробный WebSocket тест
-python3 tests/test_websocket_detailed.py
+python3 tests/websocket/test_websocket_detailed.py
 
 # Тест интеграции воркера
-python3 tests/test_worker_integration.py
+python3 tests/integration/test_worker_integration.py
 
-# Тест валидации
-python3 tests/test_validation.py
+# Тест валидации и обработки ошибок
+python3 tests/integration/test_validation.py
+
+# Упрощенный тест валидации
+python3 tests/integration/test_validation_simple.py
 
 # Интеграционные тесты
-python3 tests/test_integration.py
+python3 tests/integration/test_integration.py
 
 # Нагрузочное тестирование
-python3 tests/test_load.py
+python3 tests/load/test_load.py
 
-# Стресс-тестирование
-python3 tests/test_load.py stress
+# Юнит-тесты Redis/WebSocket
+python3 tests/test_redis_unit.py
 ```
 
 ### 4. Веб-интерфейс

@@ -11,4 +11,7 @@
 
 ## Использование
 
-Откройте `test_websocket.html` в браузере для тестирования WebSocket соединения. 
+Откройте `test_websocket.html` в браузере для тестирования WebSocket соединения.
+```bash
+open static/test_websocket.html
+```

@@ -1,5 +1,6 @@
-import aioredis
 from config import get_redis_url
+
+import aioredis
 
 
 # Определение каналов Redis
@@ -10,16 +11,17 @@ TRANSCRIPTS_CHANNEL = "transcripts"
 async def get_redis_client():
     """
     Создает и возвращает асинхронный клиент Redis.
-    
+
     Returns:
         aioredis.Redis: Асинхронный клиент Redis
     """
     return await aioredis.from_url(get_redis_url(), decode_responses=False)
 
+
 async def test_redis_connection():
     """
     Тестирует подключение к Redis.
-    
+
     Returns:
         bool: True если подключение успешно, False в противном случае
     """
@@ -36,7 +38,7 @@ async def test_redis_connection():
 async def publish_audio_chunk(data: bytes):
     """
     Публикует аудио данные в Redis канал.
-    
+
     Args:
         data (bytes): Бинарные аудио данные
     """
@@ -50,7 +52,7 @@ async def publish_audio_chunk(data: bytes):
 async def subscribe_to_transcripts(callback):
     """
     Подписывается на канал транскриптов и вызывает callback при получении сообщения.
-    
+
     Args:
         callback: Функция обратного вызова, принимающая текст транскрипта
     """
@@ -67,4 +69,4 @@ async def subscribe_to_transcripts(callback):
     finally:
         await pubsub.unsubscribe(TRANSCRIPTS_CHANNEL)
         await pubsub.close()
-        await redis.close() 
+        await redis.close()
