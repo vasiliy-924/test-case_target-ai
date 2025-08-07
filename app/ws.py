@@ -1,16 +1,14 @@
 import asyncio
-import logging
-from typing import Optional
 import base64
 import json
+import logging
+from typing import Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from redis_client import (
-    get_redis_client,
-    AUDIO_CHANNEL,
-    TRANSCRIPTS_CHANNEL
-)
+from redis_client import get_redis_client
+from constants import AUDIO_CHANNEL, TRANSCRIPTS_CHANNEL
+from config import get_max_audio_size
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
@@ -31,8 +29,9 @@ def validate_audio_data(data: bytes) -> tuple[bool, Optional[str]]:
     if not data:
         return False, "Audio data is empty"
 
-    if len(data) > 1024 * 1024:  # 1MB limit
-        return False, "Audio data too large (max 1MB)"
+    max_size = get_max_audio_size()
+    if len(data) > max_size:
+        return False, f"Audio data too large (max {max_size} bytes)"
 
     return True, None
 

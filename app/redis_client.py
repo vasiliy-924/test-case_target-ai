@@ -1,11 +1,7 @@
-from config import get_redis_url
-
 import redis.asyncio as redis
 
-
-# Определение каналов Redis
-AUDIO_CHANNEL = "audio_chunks"
-TRANSCRIPTS_CHANNEL = "transcripts"
+from config import get_redis_url
+from constants import AUDIO_CHANNEL, TRANSCRIPTS_CHANNEL
 
 
 async def get_redis_client():

@@ -1,14 +1,11 @@
 import asyncio
+import base64
+import json
 import logging
 from datetime import datetime
-import json
-import base64
 
-from redis_client import (
-    get_redis_client,
-    AUDIO_CHANNEL,
-    TRANSCRIPTS_CHANNEL
-)
+from redis_client import get_redis_client
+from constants import AUDIO_CHANNEL, TRANSCRIPTS_CHANNEL
 
 # Настройка логирования
 logging.basicConfig(
@@ -40,6 +37,8 @@ async def process_audio_chunks():
     """
     logger.info("Starting audio processing worker...")
 
+    redis = None
+    pubsub = None
     try:
         redis = await get_redis_client()
         pubsub = redis.pubsub()
@@ -83,9 +82,11 @@ async def process_audio_chunks():
         raise
     finally:
         try:
-            await pubsub.unsubscribe(AUDIO_CHANNEL)
-            await pubsub.close()
-            await redis.close()
+            if pubsub is not None:
+                await pubsub.unsubscribe(AUDIO_CHANNEL)
+                await pubsub.close()
+            if redis is not None:
+                await redis.close()
             logger.info("Worker stopped")
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")

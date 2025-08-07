@@ -64,7 +64,7 @@
 
 ```bash
 # Активация виртуального окружения
-source .venv/bin/activate
+source venv/bin/activate
 
 # Юнит-тесты (без внешних сервисов)
 pytest -q
@@ -81,4 +81,4 @@ RUN_INTEGRATION=1 pytest tests/load/test_load.py -q
 
 - Python 3.10+
 - Запущенные Docker-сервисы (`docker compose up -d`) для интеграционных/нагрузочных тестов
-- Активированное виртуальное окружение `.venv`
+- Активированное виртуальное окружение `venv`

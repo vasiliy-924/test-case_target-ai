@@ -111,8 +111,8 @@ docker exec redis redis-cli ping
 ### 3. Тестирование
 
 ```bash
-# Активация .venv
-source .venv/bin/activate
+# Активация venv
+source venv/bin/activate
 
 # Все юнит-тесты (без Docker)
 pytest -q
@@ -331,11 +331,10 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 
 # Установка зависимостей
-pip install -r app/requirements.txt
+pip install -r requirements.txt
 
 # Запуск в режиме разработки
-cd app
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 ### Добавление новых функций
